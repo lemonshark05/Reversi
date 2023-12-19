@@ -11,6 +11,7 @@
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             border: 3px solid black;
+            background-color: #FFFFFF;
         }
         .cell {
             width: 50px;
@@ -53,9 +54,9 @@
                     const id = row + "-" + col;
                     const piece = board[row][col];
                     if(piece === 1) {
-                        $("#" + id).html("<img src='pic/black.png' width='100%' height='100%'/>");
+                        $("#" + id).html("<img src='pic/black1.png' width='100%' height='100%'/>");
                     } else if(piece === -1) {
-                        $("#" + id).html("<img src='pic/white.png' width='100%' height='100%'/>");
+                        $("#" + id).html("<img src='pic/white1.png' width='100%' height='100%'/>");
                     } else {
                         $("#" + id).html("");
                     }
