@@ -13,7 +13,7 @@ else
 fi
 
 
-cd gomoku
+cd reversi
 rm divide
 
 echo $next_step >> ./black_steps.txt

@@ -12,7 +12,7 @@ else
 fi
 
 
-cd gomoku
+cd reversi
 
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then

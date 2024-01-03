@@ -15,9 +15,9 @@ using namespace std;
 
 bit_board::bit_board() {
     for (int i = 0; i < SIZE; ++i)
-        horizontal_[i] = 0x3FFFFFFF; // initialize each line to contain 15 NONE pieces - i.e. 15x the number 0x3
+        horizontal_[i] = 0xFFFF; // initialize each line to contain 15 NONE pieces - i.e. 15x the number 0x3
     for (int i = 0; i < SIZE; ++i)
-        vertical_[i] = 0x3FFFFFFF; // initialize each line to contain 15 NONE pieces - i.e. 15x the number 0x3
+        vertical_[i] = 0xFFFF; // initialize each line to contain 15 NONE pieces - i.e. 15x the number 0x3
     for (int i = 0; i < SIZE; ++i) {
 
         /* the pattern, that is being filled here via ugly bit manipulations is the following: (for the $diagonal_ array, $anti_diagonal is horizontally flipped)
@@ -42,9 +42,9 @@ void bit_board::set_board_str(std::string board_str){
 // init from board_str
     std::vector<std::string> horizontal_strs;
     tokenize(board_str, ',', horizontal_strs);
-    for(int y = 0; y < 15; y++){
+    for(int y = 0; y < 8; y++){
         int i_auto = std::stoi(horizontal_strs[y],nullptr,0);
-        for(int x = 0; x < 15; x++){
+        for(int x = 0; x < 8; x++){
             figure fig = figure((i_auto >> (x * 2)) & 3);
             if(fig == figure::WHITE || fig == figure::BLACK){
                 place_move(coords(x, y), fig);
@@ -71,8 +71,8 @@ void bit_board::apply_all_transformation(vector<bit_board>& trans_boards, vector
         for(int is_symmetry_vertical = 0; is_symmetry_vertical < 2; is_symmetry_vertical ++){
             for(int is_symmetry_anti_diagonal = 0; is_symmetry_anti_diagonal < 2; is_symmetry_anti_diagonal ++){
                 bit_board b;
-                for(int x = 0; x < 15; x++){
-                    for(int y = 0; y < 15; y++){
+                for(int x = 0; x < 8; x++){
+                    for(int y = 0; y < 8; y++){
                         coords current = coords(x, y);
                         figure fig = get_move(current);
                         if(fig == figure::WHITE || fig == figure::BLACK){
@@ -183,8 +183,8 @@ set<string> bit_board::counter_opponent(coords last_move) {
 
 
 coords bit_board::get_move_to_win(figure fig) {
-    for(int x = 0; x < 15; x++){
-        for(int y = 0; y < 15; y++){
+    for(int x = 0; x < 9; x++){
+        for(int y = 0; y < 9; y++){
             coords move = coords(x, y);
             if(is_empty(move)){
                 auto lines = get_lines<5>(move, fig);

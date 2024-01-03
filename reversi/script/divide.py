@@ -25,8 +25,20 @@ def possible_white(step_list):
 
 
 if __name__ == '__main__':
-    part_board_name = sys.argv[1]
-    next_black_name = sys.argv[2]
+    # part_board_name = sys.argv[1]
+    # next_black_name = sys.argv[2]
+
+    print("Python interpreter path:", sys.executable)
+
+    script_dir = "/Users/lemonshark/PycharmProjects/Reversi"
+    print("Script directory:", script_dir)
+
+    # Construct full paths for your files
+    part_board_name = os.path.join(script_dir, "reversi/divided/d5b_d4b_e4b_e5w_d3b/d5b_d4b_e4b_e5w_d3b_c4b.txt")
+    next_black_name = os.path.join(script_dir, "black_steps.txt")
+    print("Part board name:", part_board_name)
+    print("Next black name:", next_black_name)
+
 
     step_list = []
     step_list_plus_black = []

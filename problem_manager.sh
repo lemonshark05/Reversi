@@ -1,2 +1,2 @@
-cd ./gomoku/script/
+cd ./reversi/script/
 python3 divided_solution_manager.py $1

@@ -14,7 +14,7 @@ else
 fi
 
 
-cd gomoku
+cd reversi
 
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -22,11 +22,10 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   clang++ -std=c++17 -stdlib=libc++ -Wall -pedantic *.cpp -o noninteractive -DCLI -DTEST -DNOINTERACTIVE -DLOADCACHE
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   echo "I am mac"
-  g++  *.cpp -o noninteractive -std=c++17 -DFIND_FROM_DB -DNOINTERACTIVE $flag -DCLI -DTEST `pkg-config --cflags --libs protobuf` -I/usr/local/Cellar/rocksdb@6/6.29.4/include -lsnappy -lgflags -lz -lbz2 -llz4 -lzstd /usr/local/Cellar/jemalloc/5.3.0/lib/libjemalloc_pic.a /usr/local/Cellar/rocksdb@6/6.29.4/lib/librocksdb.a
+   g++  *.cpp -o noninteractive -std=c++17 -DFIND_FROM_DB -DNOINTERACTIVE $flag -DCLI -DTEST `pkg-config --cflags --libs protobuf` -I/opt/homebrew/opt/rocksdb@6/include -lsnappy -lgflags -lz -lbz2 -llz4 -lzstd /opt/homebrew/opt/rocksdb@6/lib/librocksdb.a
 else
   echo "this platform is not supported"
 fi
 
 cd script
 python3 ./run.py $filename  >> run.py.log
-

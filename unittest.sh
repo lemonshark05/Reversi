@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-cd gomoku
+cd reversi
 rm unittest
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   echo "I am linuX"

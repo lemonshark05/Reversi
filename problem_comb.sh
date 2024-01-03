@@ -7,8 +7,8 @@ else
     sub_count=3
 fi
 
-full_filename=./gomoku/divided/${filename:0:${#filename}-$sub_count}/$filename.txt
-mkdir ./gomoku/divided/${filename:0:${#filename}-$sub_count}/
+full_filename=./reversi/divided/${filename:0:${#filename}-$sub_count}/$filename.txt
+mkdir ./reversi/divided/${filename:0:${#filename}-$sub_count}/
 touch $full_filename
 echo $filename | tr '_' '\n' > $full_filename
 #make a correct filename location for given board

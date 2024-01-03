@@ -13,13 +13,13 @@ using namespace std;
 board_list_selector::board_list_selector(): best_score_(0) {
 	// initializes the head of the double-linked list
 	board_list_[board_list_item::NULL_OFFSET].is_empty = false;
-	board_list_[board_list_item::NULL_OFFSET].position = coords(15, 14); // invalid possition corresponding to the NULL_OFFSET
+	board_list_[board_list_item::NULL_OFFSET].position = coords(8, 7); // invalid possition corresponding to the NULL_OFFSET
 	board_list_[board_list_item::NULL_OFFSET].score[0] = board_list_[board_list_item::NULL_OFFSET].score[1] = UINT16_MAX;
 	board_list_[board_list_item::NULL_OFFSET].next = board_list_[board_list_item::NULL_OFFSET].previous = board_list_item::NULL_OFFSET;
 
 	// sets the right position of other nodes
-	for(offset y = 0; y < 15; ++y)
-		for(offset x = 0; x < 15; ++x)
+	for(offset y = 0; y < 8; ++y)
+		for(offset x = 0; x < 8; ++x)
 			board_list_[index(x, y)].position = coords(x, y);
 }
 
@@ -35,7 +35,7 @@ void board_list_selector::full_update(const bit_board& board, coords position) {
 	// update moves that are 1 or 2 pieces apart from $position
 	// if the move is not among the possible moves, add it
 
-	for (int i = 0; i < 16; ++i) { // loop over all offset that are 1 or 2 pieces apart from $position
+	for (int i = 0; i < 9; ++i) { // loop over all offset that are 1 or 2 pieces apart from $position
 		coords new_pos = position + inner_star[i];
 		if (new_pos.is_out_of_board()) continue;
 		if (!board.is_empty(new_pos)) continue;
@@ -63,7 +63,7 @@ void board_list_selector::full_update(const bit_board& board, coords position) {
 	// if the move is not among the possible moves, ignore it (because moves that are farther
 	// than 2 pieces aren't likely to be good moves)
 
-	for (int i = 0; i < 16; ++i) {
+	for (int i = 0; i < 9; ++i) {
 		coords new_pos = position + middle_star[i];
 		if (new_pos.is_out_of_board()) continue;
 		if (!board.is_empty(new_pos)) continue;
@@ -97,7 +97,7 @@ void board_list_selector::shallow_update(const bit_board& board, coords position
 	// update moves that are 1 or 2 pieces apart from $position
 	// if the move is not among the possible moves, add it
 
-	for (int i = 0; i < 16; ++i) {
+	for (int i = 0; i < 9; ++i) {
 		coords new_pos = position + inner_star[i];
 		if (new_pos.is_out_of_board()) continue;
 		if (!board.is_empty(new_pos)) continue;
@@ -113,7 +113,7 @@ void board_list_selector::shallow_update(const bit_board& board, coords position
 	// if the move is not among the possible moves, ignore it (because moves that are farther
 	// than 2 pieces aren't likely to be good moves)
 
-	for (int i = 0; i < 16; ++i) {
+	for (int i = 0; i < 9; ++i) {
 		coords new_pos = position + middle_star[i];
 		if (new_pos.is_out_of_board()) continue;
 		if (!board.is_empty(new_pos)) continue;

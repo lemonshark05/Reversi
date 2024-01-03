@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-cd gomoku
+cd reversi
 
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
