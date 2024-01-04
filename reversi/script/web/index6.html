@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reversi</title>
+    <script src="js/jquery.js"></script>
+    <style>
+        #board {
+            width: 300px;
+            height: 300px;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            border: 3px solid black;
+            background-color: #FFFFFF;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 1px solid;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .valid-move::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background-color: gray;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .flip-to-black img {
+            content: url('pic/black1.png');
+        }
+        .flip-to-white img {
+            content: url('pic/white1.png');
+        }
+    </style>
+    <script>
+        let boardSize = 6;
+        let board = Array(boardSize).fill(null).map(() => Array(boardSize).fill(0));
+        let isBlackTurn = true;
+        let isAI = false;
+        let history = [];
+<!--        let moveHistory = "c4b_c3w_d3b_d4w";-->
+        let moveHistory = new Map();
+        moveHistory.set("c4","b");
+        moveHistory.set("c3","w");
+        moveHistory.set("d3","b");
+        moveHistory.set("d4","w");
+        const directions = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]];
+
+        function updateBoardUI() {
+            let boardText = "";
+            for(let row = 0; row < boardSize; row++) {
+                for(let col = 0; col < boardSize; col++) {
+                    const id = row + "-" + col;
+                    const piece = board[row][col];
+                    if(piece === 1) {
+                        $("#" + id).html("<img src='pic/black1.png' width='100%' height='100%'/>");
+                    } else if(piece === -1) {
+                        $("#" + id).html("<img src='pic/white1.png' width='100%' height='100%'/>");
+                    } else {
+                        $("#" + id).html("");
+                    }
+                    boardText += piece + " ";
+                }
+                boardText += "<br/>";
+            }
+            $("#boardMatrix").html(boardText);
+        }
+
+        function positionToString(x, y) {
+            let charPart = String.fromCharCode('a'.charCodeAt(0) + x); // Convert X-coordinate to character
+            let numPart = y + 1; // Convert Y-coordinate to 1-based index
+            return charPart + numPart;
+        }
+
+        function isValidMove(board, row, col, player) {
+            if (board[row][col] !== 0) return false;
+
+            const directions = [
+                [-1, 0], [1, 0], [0, -1], [0, 1],
+                [-1, -1], [-1, 1], [1, -1], [1, 1]
+            ];
+
+            for (let [dx, dy] of directions) {
+                let x = row + dx;
+                let y = col + dy;
+
+                if (x >= 0 && x < boardSize && y >= 0 && y < boardSize && board[x][y] === -player) {
+                    while (x >= 0 && x < boardSize && y >= 0 && y < boardSize) {
+                        if (board[x][y] === 0) break;
+                        if (board[x][y] === player) {
+                            // Check for unbroken line of opponent's pieces
+                            let checkX = row + dx;
+                            let checkY = col + dy;
+                            while (checkX !== x || checkY !== y) {
+                                if (board[checkX][checkY] !== -player) break;
+                                checkX += dx;
+                                checkY += dy;
+                            }
+                            if (checkX === x && checkY === y) return true;
+                            break;
+                        }
+                        x += dx;
+                        y += dy;
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Show valid moves with a dot
+        function showValidMoves() {
+            $(".cell").removeClass("valid-move"); // remove all previous dots
+            for(let row = 0; row <boardSize ; row++) {
+                for(let col = 0; col < boardSize; col++) {
+                    if (isValidMove(board, row, col, isBlackTurn ? 1 : -1)) {
+                        $("#" + row + "-" + col).addClass("valid-move");  // add a class to show a dot
+                    }
+                }
+            }
+        }
+
+        function flipPieces(row, col, player) {
+            let flipped = false;
+            let flippedPieces = new Map();
+            for (let [dx, dy] of directions) {
+                let x = row + dx;
+                let y = col + dy;
+                let toFlip = [];
+
+                while (x >= 0 && x < boardSize && y >= 0 && y < boardSize) {
+                    if (board[x][y] === 0) {
+                        toFlip = []; // clear toFlip if an empty space is encountered
+                        break;
+                    }
+
+                    if (board[x][y] === -player) {
+                        toFlip.push([x, y]); // add to toFlip if the opposite player's piece is found
+                    } else if (board[x][y] === player) {
+                        break; // break if the current player's piece is found
+                    }
+
+                    x += dx;
+                    y += dy;
+                }
+
+                // Flip the pieces if the loop ended because we found a piece of the current player
+                if (x >= 0 && x < boardSize && y >= 0 && y < boardSize && board[x][y] === player) {
+                    for (let [fx, fy] of toFlip) {
+                        board[fx][fy] = player;
+                        const id = fx + "-" + fy;
+                        $("#" + id).html(`<img src='pic/${player === 1 ? 'black' : 'white'}.png' width='100%' height='100%'/>`);
+                        let position = positionToString(fx, fy);
+                        if (moveHistory.has(position)) {
+                            moveHistory.set(position, player === 1 ? 'b' : 'w'); // Update the color in moveHistory
+                        }
+                        flipped = true;
+                    }
+                }
+            }
+            if (flipped) {
+                updateMoveHistoryUI();
+            }
+        }
+
+        function handleCellClick(row, col) {
+            const player = isBlackTurn ? 1 : -1;
+            if (isValidMove(board, row, col, player)) {
+                history.push(JSON.stringify(board));
+                board[row][col] = player;
+                flipPieces(row, col, player);  // Flip the opponent's pieces
+                updateBoardUI();
+
+                // Record the move
+                const playerColor = isBlackTurn ? 'b' : 'w';
+                let move = positionToString(row, col)
+                console.log("Move made:", move);
+                moveHistory.set(move, playerColor);
+                console.log("Updated move history:", moveHistory);
+                updateMoveHistoryUI();
+
+                isBlackTurn = !isBlackTurn;
+                // Check if the next player can move
+                if (!canMove(isBlackTurn ? 1 : -1)) {
+                    isBlackTurn = !isBlackTurn;  // Switch turn back
+
+                    // If neither player can move, the game ends
+                    if (!canMove(isBlackTurn ? 1 : -1)) {
+                        checkWinner();
+                        return;
+                    }
+                }
+                showValidMoves();
+            }
+        }
+
+        // Check if any valid moves are possible for a player
+        function canMove(player) {
+            for(let row = 0; row < boardSize; row++) {
+                for(let col = 0; col < boardSize; col++) {
+                    if (isValidMove(board, row, col, player)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        <!--init page-->
+        function start() {
+            board = Array(boardSize).fill(null).map(() => Array(boardSize).fill(0));
+            const mid1 = Math.floor(boardSize / 2) - 1;
+            const mid2 = Math.floor(boardSize / 2);
+            board[mid1][mid1] = -1;
+            board[mid1][mid2] = 1;
+            board[mid2][mid1] = 1;
+            board[mid2][mid2] = -1;
+
+            let content = "";
+            for(let row = 0; row < boardSize; row++) {
+                for(let col = 0; col < boardSize; col++) {
+                    content += `<div class='cell' id='${row}-${col}' onclick='handleCellClick(${row},${col})'></div>`;
+                }
+            }
+            $("#board").html(content);
+            updateBoardUI();
+            showValidMoves();
+        }
+
+        function setGameMode(mode) {
+            isAI = (mode === 'AI');
+            start();
+        }
+
+        function checkWinner() {
+            let blackCount = 0;
+            let whiteCount = 0;
+
+            for(let row = 0; row < boardSize; row++) {
+                for(let col = 0; col < boardSize; col++) {
+                    if (board[row][col] === 1) {
+                        blackCount++;
+                    } else if (board[row][col] === -1) {
+                        whiteCount++;
+                    }
+                }
+            }
+
+            if (blackCount > whiteCount) alert(`Black wins with ${blackCount} to ${whiteCount}`);
+            else if (whiteCount > blackCount) alert(`White wins with ${whiteCount} to ${blackCount}`);
+            else alert("It's a tie!");
+        }
+
+        function undo() {
+            if (history.length === 0) return; // No moves to undo
+
+            board = JSON.parse(history.pop()); // Restore previous board state
+            isBlackTurn = !isBlackTurn; // Switch back to the previous turn
+
+            updateBoardUI();
+            showValidMoves();
+            updateMoveHistoryUI();
+        }
+
+        function updateMoveHistoryUI() {
+            let moveHistoryString = Array.from(moveHistory.entries())
+                .map(([position, color]) => `${position}${color}`)
+                .join('_');
+
+            // Get the div element with the id "moveHistory"
+            let moveHistoryDiv = document.getElementById("moveHistory");
+
+            // Update the innerHTML of the div element with the new moveHistoryString
+            moveHistoryDiv.innerHTML = "Move History: " + moveHistoryString;
+
+            console.log("Move History String:", moveHistoryString);
+        }
+        window.onload = start;
+    </script>
+</head>
+    <body>
+        <div>
+            <div id="board"></div>
+            <div id="boardMatrix"></div>
+            <div>
+                <button onclick="undo();" type="button">撤销 (UNDO)</button>
+                <button onclick="start();" type="button">重新开始 (RESTART)</button>
+            </div>
+            <div>
+                <button onclick="setGameMode('Player');" type="button">玩家对战 (Play with Player)</button>
+                <button onclick="setGameMode('AI');" type="button">人机对战 (Play with AI)</button>
+            </div>
+            <div id="moveHistory">Move History: c4b_c3w_d3b_d4w</div>
+        </div>
+    </body>
+</html>
